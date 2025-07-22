@@ -1,0 +1,48 @@
+﻿@inject iRepositorySubjectCount _Subs
+ 
+
+@if(Subjectscount == null)
+{
+
+}
+else
+{
+    <table style="font-size:10px;">
+        <thead>
+            <tr>
+                <th class="bg-info text-white">T</th>
+                <th class="bg-success text-white">P</th>
+                <th class="bg-danger text-white">A</th>
+                <th class="bg-warning text-white">L</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                @foreach(var ss in Subjectscount)
+                {
+                   <td><b>@ss.TotalSubjects</b></td>
+                   <td><b>@ss.TotalPresent</b></td>
+                   <td><b>@ss.TotalAbsent</b></td>
+                   <td><b>@ss.TotalLate</b></td>
+                }
+
+            </tr>
+        </tbody>
+    </table>
+}
+
+
+@code {
+    [Parameter]
+    public DateTime Currdate { get; set; }
+    [Parameter]
+    public string StudentCode { get; set; }
+
+    List<SubjectsCounts> Subjectscount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Subjectscount = await _Subs.GetSubjectCount(Currdate, StudentCode);
+
+    }
+}

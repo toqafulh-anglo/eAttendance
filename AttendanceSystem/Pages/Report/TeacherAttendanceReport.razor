@@ -1,0 +1,160 @@
+﻿@page "/TeacherReportNoAttendance/{Campus}"
+@inject iRepositoryTeacher_Attendance _teacherAttendance
+@inject iRepositoryTeacherReports _Teach
+@if (isLoading == true)
+{
+    <br />
+    <br />
+    <SpinLoader IsLoading="isLoading">
+        <LoadingTemplate>
+
+            <div class="col">
+                <br /> <br /> <br />
+                <Plane Center="true" Size="80px" Color="black"></Plane>
+
+            </div>
+
+        </LoadingTemplate>
+
+    </SpinLoader>
+}
+else
+{
+
+<center><h3>Campus @Campus Teacher Report No Attendance</h3></center>
+<div class="row position-sticky pt-1 py-2">
+    <div class='col-sm-offset-4 col-sm-4'>
+
+        <h5>Select Date: </h5>
+        <div class="form-group">
+            <div class="input-group">
+                <input type="date" class="form-control input-lg rounded" @bind="onDate" />
+            </div>
+        </div>
+        <h5>Select Department: </h5>
+        <div class="form-group">
+            <div class="input-group">
+                <select @bind="Department" class="form-control py-2">
+                    <option value="" disabled>- Select Departments -</option>
+                    @if (listDepartments != null)
+                    {
+                        foreach (var ss in listDepartments.Select(s => s.Department).Distinct())
+                        {
+                            <option value="@ss">@ss</option>
+                        }
+                    }
+                </select>
+                    <buttton type="button" class="input-group-lg btn btn-primary mx-2" @onclick="getTeachers">
+                    <span class="oi oi-magnifying-glass mx-4"></span>
+                </buttton>
+            </div>
+        </div>
+    </div>
+    
+    </div>
+    <div class="form-group">
+        @if (Links != null)
+        {
+            foreach (var _link in Links)
+            {
+                <a href="@_link.TimetableLink" target="_blank">Click here to view teacher timetable</a>
+            }
+        }
+    </div>
+    <DataGrid TItem="vwTeacherTracking"
+              Data="@listTeachers">
+    </DataGrid>
+    <DataGrid TItem="vwTeacherTracking" Data="@listTeachers" Filterable="false" PageSize="50" ShowPager="true" EditMode="DataGridEditMode.Inline">
+        <DataGridColumn TItem="vwTeacherTracking" Field="@nameof(vwTeacherTracking.Name)" Caption="Name" Editable="false"></DataGridColumn>
+        <DataGridColumn TItem="vwTeacherTracking" Field="@nameof(vwTeacherTracking.Department)" Caption="Department" Editable="false"></DataGridColumn>
+    </DataGrid>
+}
+
+
+@code {
+    [Parameter]
+    public string Campus { get; set; }
+    public string Department { get; set; }
+
+    public DateTime CurrDate = DateTime.Now.Date;
+
+    public DateTime onDate
+    {
+        get { return CurrDate; }
+        set
+        {
+            CurrDate = value;
+            getDepartment();
+        }
+    }
+
+    //public string onDepartment
+    //{
+    //    get { return Department; }
+    //    set
+    //    {
+    //        Department = value;
+    //        getTeachers();
+    //    }
+    //}
+
+    List<vwTeacherDepartment> listDepartments;
+    List<vwTeacherTracking> listTeachers;
+    List<Timetable_Links> Links;
+
+    bool isLoading = false;
+    bool spinning = false;
+
+    public string Style = "text-align:center; font-size:12px; width:100%; height:100%;";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            isLoading = true;
+            listDepartments = await _teacherAttendance.getTeacherDepartment(CurrDate, Campus);
+            isLoading = false;
+            StateHasChanged();
+        }
+        catch
+        {
+            throw;
+        }
+
+    }
+
+    protected async Task getDepartment()
+    {
+        try
+        {
+            isLoading = true;
+            listDepartments = await _teacherAttendance.getTeacherDepartment(CurrDate, Campus);
+            listTeachers = null;
+            Department = null;
+            isLoading = false;
+            StateHasChanged();
+        }
+        catch
+        {
+            throw;
+        }
+    }
+
+    protected async Task getTeachers()
+    {
+        try
+        {
+            isLoading = true;
+            listTeachers = await _teacherAttendance.getTeachers(CurrDate, Department, Campus);
+            Links = await _Teach.GetSpecificLink(Department, Campus);
+            isLoading = false;
+            StateHasChanged();
+        }
+        catch
+        {
+            throw;
+        }
+    }
+
+
+}

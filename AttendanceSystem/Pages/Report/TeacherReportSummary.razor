@@ -1,0 +1,323 @@
+﻿@page "/TeacherAttendanceSummary/{Campus}"
+@inject iRepositoryTeacherReports _Teach
+
+<center><h3>Campus @Campus Teacher Summary Report</h3></center>
+<div class="row position-sticky pt-1 py-2">
+    <div class='col-sm-offset-4 col-sm-4'>
+
+        <h5>Select Date: </h5>
+        <div class="form-group">
+            <div class="input-group">
+                <input type="date" class="form-control input-lg rounded" @bind="CurrDate" />
+            </div>
+        </div>
+        <h5>Select Department: </h5>
+        <div class="form-group">
+            <div class="input-group">
+                <select @bind="Department" class="form-control py-2">
+                    @if (TeacherReportPivot == null)
+                    {
+                        <option>@Campus</option>
+
+                    }
+                    else
+                    {
+                        <option value="">-</option>
+                        foreach (var ss in TeacherReportPivot)
+                        {
+                            <option value="@ss.Department">@ss.Department</option>
+                        }
+                    }
+
+                    }
+                </select>
+                <buttton type="button" class="input-group-lg btn btn-primary mx-2" @onclick="SetDate">
+                    <span class="oi oi-magnifying-glass mx-4"></span>
+                </buttton>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm"></div>
+</div>
+@if (isLoading == true)
+{
+    <br />
+    <br />
+    <SpinLoader IsLoading="isLoading">
+        <LoadingTemplate>
+
+            <div class="col">
+                <br /> <br /> <br />
+                <Plane Center="true" Size="80px" Color="black"></Plane>
+
+            </div>
+
+        </LoadingTemplate>
+
+    </SpinLoader>
+}
+else
+{
+    <div class="form-group">
+        @if (Links == null)
+        {
+            <Label>Test</Label>
+        }
+        else
+        {
+            foreach (var _link in Links)
+            {
+                <a href="@_link.TimetableLink" target="_blank">Click here to view teacher timetable</a>
+            }
+        }
+    </div>
+    <DataGrid TItem="Teacher_Attendance_Report_Pivot"
+              Data="@TeacherReportRecord">
+
+    </DataGrid>
+
+    <DataGrid TItem="Teacher_Attendance_Report_Pivot" Data="@TeacherReportRecord" Filterable="false" PageSize="50" ShowPager="true" EditMode="DataGridEditMode.Inline">
+
+        <DataGridColumn TItem="Teacher_Attendance_Report_Pivot" Field="@nameof(Teacher_Attendance_Report_Pivot.Department)" Caption="Department" Editable="false"></DataGridColumn>
+        <DataGridColumn TItem="Teacher_Attendance_Report_Pivot" Field="@nameof(Teacher_Attendance_Report_Pivot.TName)" Caption="Teacher" Editable="false"></DataGridColumn>
+
+        <DataGridColumn TItem="Teacher_Attendance_Report_Pivot" Field="@nameof(Teacher_Attendance_Report_Pivot.Class1)" Caption="C1" Editable="false">
+            <DisplayTemplate>
+                @{ var Class = (context as Teacher_Attendance_Report_Pivot)?.Class1;
+                    @if (Class == null)
+                    {
+                        <label class="bg-light text-black-50 py-3" style="@Style"> - </label>
+                    }
+                    else
+                    {
+                        <label class="bg-success text-white py-3" style="@Style"> @Class</label>
+                    }
+                }
+            </DisplayTemplate>
+        </DataGridColumn>
+        <DataGridColumn TItem="Teacher_Attendance_Report_Pivot" Field="@nameof(Teacher_Attendance_Report_Pivot.Class2)" Caption="C2" Editable="false">
+            <DisplayTemplate>
+                @{ var Class = (context as Teacher_Attendance_Report_Pivot)?.Class2;
+                    @if (Class == null)
+                    {
+                        <label class="bg-light text-black-50 py-3" style="@Style"> - </label>
+                    }
+                    else
+                    {
+                        <label class="bg-success text-white py-3" style="@Style"> @Class</label>
+                    }
+                }
+            </DisplayTemplate>
+        </DataGridColumn>
+        <DataGridColumn TItem="Teacher_Attendance_Report_Pivot" Field="@nameof(Teacher_Attendance_Report_Pivot.Class3)" Caption="C3" Editable="false">
+            <DisplayTemplate>
+                @{ var Class = (context as Teacher_Attendance_Report_Pivot)?.Class3;
+                    @if (Class == null)
+                    {
+                        <label class="bg-light text-black-50 py-3" style="@Style"> - </label>
+                    }
+                    else
+                    {
+                        <label class="bg-success text-white py-3" style="@Style"> @Class</label>
+                    }
+                }
+            </DisplayTemplate>
+        </DataGridColumn>
+        <DataGridColumn TItem="Teacher_Attendance_Report_Pivot" Field="@nameof(Teacher_Attendance_Report_Pivot.Class4)" Caption="C4" Editable="false">
+            <DisplayTemplate>
+                @{ var Class = (context as Teacher_Attendance_Report_Pivot)?.Class4;
+                    @if (Class == null)
+                    {
+                        <label class="bg-light text-black-50 py-3" style="@Style"> - </label>
+                    }
+                    else
+                    {
+                        <label class="bg-success text-white py-3" style="@Style"> @Class</label>
+                    }
+                }
+            </DisplayTemplate>
+        </DataGridColumn>
+        <DataGridColumn TItem="Teacher_Attendance_Report_Pivot" Field="@nameof(Teacher_Attendance_Report_Pivot.Class5)" Caption="C5" Editable="false">
+            <DisplayTemplate>
+                @{ var Class = (context as Teacher_Attendance_Report_Pivot)?.Class5;
+                    @if (Class == null)
+                    {
+                        <label class="bg-light text-black-50 py-3" style="@Style"> - </label>
+                    }
+                    else
+                    {
+                        <label class="bg-success text-white py-3" style="@Style"> @Class</label>
+                    }
+                }
+            </DisplayTemplate>
+        </DataGridColumn>
+        <DataGridColumn TItem="Teacher_Attendance_Report_Pivot" Field="@nameof(Teacher_Attendance_Report_Pivot.Class6)" Caption="C6" Editable="false">
+            <DisplayTemplate>
+                @{ var Class = (context as Teacher_Attendance_Report_Pivot)?.Class6;
+                    @if (Class == null)
+                    {
+                        <label class="bg-light text-black-50 py-3" style="@Style"> - </label>
+                    }
+                    else
+                    {
+                        <label class="bg-success text-white py-3" style="@Style"> @Class</label>
+                    }
+                }
+            </DisplayTemplate>
+        </DataGridColumn>
+        <DataGridColumn TItem="Teacher_Attendance_Report_Pivot" Field="@nameof(Teacher_Attendance_Report_Pivot.Class7)" Caption="C7" Editable="false">
+            <DisplayTemplate>
+                @{ var Class = (context as Teacher_Attendance_Report_Pivot)?.Class7;
+                    @if (Class == null)
+                    {
+                        <label class="bg-light text-black-50 py-3" style="@Style"> - </label>
+                    }
+                    else
+                    {
+                        <label class="bg-success text-white py-3" style="@Style"> @Class</label>
+                    }
+                }
+            </DisplayTemplate>
+        </DataGridColumn>
+        <DataGridColumn TItem="Teacher_Attendance_Report_Pivot" Field="@nameof(Teacher_Attendance_Report_Pivot.Class8)" Caption="C8" Editable="false">
+            <DisplayTemplate>
+                @{ var Class = (context as Teacher_Attendance_Report_Pivot)?.Class8;
+                    @if (Class == null)
+                    {
+                        <label class="bg-light text-black-50 py-3" style="@Style"> - </label>
+                    }
+                    else
+                    {
+                        <label class="bg-success text-white py-3" style="@Style"> @Class</label>
+                    }
+                }
+            </DisplayTemplate>
+        </DataGridColumn>
+        <DataGridColumn TItem="Teacher_Attendance_Report_Pivot" Field="@nameof(Teacher_Attendance_Report_Pivot.Class9)" Caption="C9" Editable="false">
+            <DisplayTemplate>
+                @{ var Class = (context as Teacher_Attendance_Report_Pivot)?.Class9;
+                    @if (Class == null)
+                    {
+                        <label class="bg-light text-black-50 py-3" style="@Style"> - </label>
+                    }
+                    else
+                    {
+                        <label class="bg-success text-white py-3" style="@Style"> @Class</label>
+                    }
+                }
+            </DisplayTemplate>
+        </DataGridColumn>
+        <DataGridColumn TItem="Teacher_Attendance_Report_Pivot" Field="@nameof(Teacher_Attendance_Report_Pivot.Class10)" Caption="C10" Editable="false">
+            <DisplayTemplate>
+                @{ var Class = (context as Teacher_Attendance_Report_Pivot)?.Class10;
+                    @if (Class == null)
+                    {
+                        <label class="bg-light text-black-50 py-3" style="@Style"> - </label>
+                    }
+                    else
+                    {
+                        <label class="bg-success text-white py-3" style="@Style"> @Class</label>
+                    }
+                }
+            </DisplayTemplate>
+        </DataGridColumn>
+        <DataGridColumn TItem="Teacher_Attendance_Report_Pivot" Field="@nameof(Teacher_Attendance_Report_Pivot.Class11)" Caption="C11" Editable="false">
+            <DisplayTemplate>
+                @{ var Class = (context as Teacher_Attendance_Report_Pivot)?.Class11;
+                    @if (Class == null)
+                    {
+                        <label class="bg-light text-black-50 py-3" style="@Style"> - </label>
+                    }
+                    else
+                    {
+                        <label class="bg-success text-white py-3" style="@Style"> @Class</label>
+                    }
+                }
+            </DisplayTemplate>
+        </DataGridColumn>
+        <DataGridColumn TItem="Teacher_Attendance_Report_Pivot" Field="@nameof(Teacher_Attendance_Report_Pivot.Class12)" Caption="C12" Editable="false">
+            <DisplayTemplate>
+                @{ var Class = (context as Teacher_Attendance_Report_Pivot)?.Class12;
+                    @if (Class == null)
+                    {
+                        <label class="bg-light text-black-50 py-3" style="@Style"> - </label>
+                    }
+                    else
+                    {
+                        <label class="bg-success text-white py-3" style="@Style"> @Class</label>
+                    }
+                }
+            </DisplayTemplate>
+        </DataGridColumn>
+
+    </DataGrid>
+}
+
+@code {
+    [Parameter]
+    public string Campus { get; set; }
+
+    public string Department { get; set; }
+    public DateTime CurrDate = DateTime.Now.Date;
+
+    List<Teacher_Attendance_Report_Pivot> TeacherReportPivot;
+    List<Teacher_Attendance_Report_Pivot> TeacherReportRecord;
+    List<Timetable_Links> Links;
+
+    bool isLoading = false;
+    bool spinning = false;
+
+    public string Style = "text-align:center; font-size:12px; width:100%; height:100%;";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            isLoading = true;
+            spinning = true;
+            await Task.Run(() => LongOperation());
+            TeacherReportPivot = await _Teach.GetSpecificDepartment(Campus);
+            TeacherReportRecord = await _Teach.GetTeacherAttendanceReport(Department, Campus, CurrDate);
+            Links = await _Teach.GetSpecificLink(Department, Campus);
+            spinning = false;
+            await Task.CompletedTask;
+        }
+        catch
+        {
+            throw;
+        }
+
+    }
+
+    protected async Task SetDate()
+    {
+
+        isLoading = true;
+        spinning = true;
+        StateHasChanged();
+        await Task.Run(() => LongOperation());
+        TeacherReportRecord = await _Teach.GetTeacherAttendanceReport(Department, Campus, CurrDate);
+        Links = await _Teach.GetSpecificLink(Department, Campus);
+        spinning = false;
+        await Task.CompletedTask;
+
+    }
+
+    protected void LongOperation()
+    {
+        Task.Delay(500).Wait();
+        isLoading = false;
+    }
+
+    void OnSelectedRowStyling(Attendance_Report_Pivots Attendance_Report_Pivots, DataGridRowStyling styling)
+    {
+        styling.Background = Background.Light;
+
+    }
+
+    void OnRowStyling(Attendance_Report_Pivots Attendance_Report_Pivots, DataGridRowStyling styling)
+    {
+        styling.Style = "vertical-align: middle;";
+
+    }
+}

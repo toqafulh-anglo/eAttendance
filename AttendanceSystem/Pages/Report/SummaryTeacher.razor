@@ -1,0 +1,475 @@
+﻿@page "/TeacherSummary/ertiequwgfasdfbqwoetwoqrewqprgfsadkvcapweyrt2pqregwjfalw9yrwerywasjfgawdufkfgawkufvakfjgweufvkfgwoufgqowrt23yr2p3rtgwdsfgdqo72egealjfl3rgwoeifgalwfbqwoetwoqrewqprgfsadkvcapweyrt2pqregwjfalw9yrwerywasjfgawdufkfgawkufvakfjg/{Campus}"
+@inject iRepositoryReports _Reps
+@inject iRepositorySummary _Sum
+
+
+<div class="row position-sticky pt-1 py-1">
+    <div class='col-sm-offset-4 col-sm-4'>
+        <h3>Campus @Campus Attendance Teacher Summary</h3>
+        @*<h5>E - Teaching (Monday, Tuesday, Thursday, Friday) </h5>
+        <h5>E - Learning (Wednesday)</h5>*@
+        <h5>Select Date: </h5>
+        <div class="form-group">
+            <div class="input-group">
+                <input type="date" class="form-control input-lg rounded" @bind="CurrDate" />
+                <buttton type="button" class="input-group-lg btn btn-primary mx-2" @onclick="SetDate">
+                    <span class="oi oi-magnifying-glass mx-4"></span>
+                </buttton>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm"></div>
+    <div class="col-sm-4" style="height: 160px; overflow: auto; margin-right:20px;">
+        @*<table class="table table-striped" style="font-size:12px; border:8px solid grey;">
+            <thead>
+                <tr>
+                    <th colspan="4" style="text-align:center; font-size:14px;" class="bg-dark text-white">Summary (scroll down to view information)</th>
+                </tr>
+                <tr>
+                    <th style="text-align:center;" class="sticky-top bg-dark text-white">MAG Class</th>
+                    <th style="text-align:center;" class="sticky-top bg-dark text-white">Total Students</th>
+                    <th style="text-align:center;" class="sticky-top bg-dark text-white"># of Present</th>
+                    <th style="text-align:center;" class="sticky-top bg-dark text-white"># of Absent</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @if (SummaryList == null)
+                {
+
+                }
+                else
+                {
+                    @foreach (var sum in SummaryList)
+                    {
+                        <tr>
+                            <td>@sum.DESCRIPTION</td>
+                            <td style="text-align: center;">@sum.TotalStudents</td>
+                            @if (sum.TotalPresent == 0)
+                            {
+                                <td style="text-align: center;">0</td>
+                            }
+                            else
+                            {
+                                <td style="text-align: center;">@sum.TotalPresent</td>
+                            }
+                            @if (sum.TotalAbsent == 0)
+                            {
+                                <td style="text-align: center;">0</td>
+                            }
+                            else
+                            {
+                                <td style="text-align: center;">@sum.TotalAbsent</td>
+                            }
+                        </tr>
+                    }
+
+                }
+
+            </tbody>
+        </table>*@
+    </div>
+</div>
+
+@if (isLoading == true)
+{
+    <br />
+    <br />
+    <SpinLoader IsLoading="isLoading">
+        <LoadingTemplate>
+
+            <div class="col">
+                <br /> <br /> <br />
+                <Plane Center="true" Size="80px" Color="black"></Plane>
+
+            </div>
+
+        </LoadingTemplate>
+
+    </SpinLoader>
+}
+else
+{
+
+
+    <DataGrid TItem="Attendance_Report_Pivots"
+              Data="@AttendanceReports">
+
+    </DataGrid>
+
+    <DataGrid TItem="Attendance_Report_Pivots" Data="@AttendanceReports" Filterable="true" PageSize="50" ShowPager="true" EditMode="DataGridEditMode.Inline" SelectedRowStyling="@OnSelectedRowStyling" RowStyling="@OnRowStyling">
+
+
+        <DataGridColumn TItem="Attendance_Report_Pivots" Field="@nameof(Attendance_Report_Pivots.DESCRIPTION)" Caption="Search MAG" Editable="false"></DataGridColumn>
+        @*<DataGridColumn TItem="Attendance_Report_Pivots" Field="@nameof(Attendance_Report_Pivots.StudentCode)" Caption="SCode" Editable="false"></DataGridColumn>*@
+        <DataGridColumn TItem="Attendance_Report_Pivots" Field="@nameof(Attendance_Report_Pivots.SName)" Caption="Search Student" Editable="false"></DataGridColumn>
+        @*<DataGridColumn TItem="Attendance_Report_Pivots" Field="@nameof(Attendance_Report_Pivots.Date_Time)" Caption="Date" Editable="false" Filterable="false"></DataGridColumn>*@
+        @*<DataGridColumn TItem="Attendance_Report_Pivots" Field="@nameof(Attendance_Report_Pivots.Note_Status)" Caption="Reason for Absence" Filterable="false">
+            <DisplayTemplate>
+
+                @{
+                    var ss = (context as Attendance_Report_Pivots);
+                    {
+                        <AttendanceSystem.Pages.Report.Notes id="@ss.StudentCode" Currdate="@ss.CurrentDate" Campus="@ss.Campus"></AttendanceSystem.Pages.Report.Notes>
+                    }
+                }
+            </DisplayTemplate>
+        </DataGridColumn>*@
+
+        <DataGridColumn TItem="Attendance_Report_Pivots" Field="@nameof(Attendance_Report_Pivots.Note_Text)" Caption="SA Notes" Editable="true" Filterable="false">
+            <DisplayTemplate>
+                @{ var notes = (context as Attendance_Report_Pivots).Note_Text;
+                    <span class="form-group">
+                        @if (notes == null)
+                        {
+                            <textarea style="display:block; font-size:12px; margin-bottom:5px;" rows="2" disabled></textarea>
+                        }
+                        else
+                        {
+                            <textarea style="display:block; font-size:12px; margin-bottom:5px;" rows="2" disabled>@notes</textarea>
+                        }
+
+                    </span>
+                }
+            </DisplayTemplate>
+        </DataGridColumn>
+        <DataGridColumn TItem="Attendance_Report_Pivots" Field="@nameof(Attendance_Report_Pivots.Note_Status)" Caption="Subject Count" Filterable="false">
+            <DisplayTemplate>
+                @{
+                    var sss = (context as Attendance_Report_Pivots);
+                    {
+                        <AttendanceSystem.Pages.Report.SubCount Currdate="@sss.CurrentDate" StudentCode="@sss.StudentCode"></AttendanceSystem.Pages.Report.SubCount>
+                    }
+                }
+            </DisplayTemplate>
+        </DataGridColumn>
+            <DataGridColumn TItem="Attendance_Report_Pivots" Field="@nameof(Attendance_Report_Pivots.Class1)" Caption="C1" Editable="false" Filterable="false" Sortable="false">
+                <DisplayTemplate>
+
+                    @{ var Class = (context as Attendance_Report_Pivots)?.Class1;
+                        @if (Class == null)
+                        {
+                            <label class="bg-light text-black-50 py-3" style="@Style"> - </label>
+                        }
+                        else if (Class.Contains("PRESENT"))
+                        {
+                            <label class="bg-success text-white py-3" style="@Style"> @Class.Substring(7)</label>
+                        }
+                        else if (Class.Contains("ABSENT"))
+                        {
+                            <label class="bg-danger text-white py-3" style="@Style">@Class.Substring(6)</label>
+                        }
+                        else if (Class.Contains("LATE"))
+                        {
+                            <label class="bg-warning text-white py-3" style="@Style">@Class.Substring(4)</label>
+                        }
+                        else if (Class.Contains("AUTHOR"))
+                        {
+                            <label class="border border-danger text-danger py-3" style="@Style">@Class</label>
+                        }
+
+                    }
+                </DisplayTemplate>
+            </DataGridColumn>
+            <DataGridColumn TItem="Attendance_Report_Pivots" Field="@nameof(Attendance_Report_Pivots.Class2)" Caption="C2" Editable="false" Filterable="false" Sortable="false">
+                <DisplayTemplate>
+
+                    @{ var Class = (context as Attendance_Report_Pivots)?.Class2;
+                        @if (Class == null)
+                        {
+                            <label class="bg-light text-black-50 py-3" style="@Style"> - </label>
+                        }
+                        else if (Class.Contains("PRESENT"))
+                        {
+                            <label class="bg-success text-white py-3" style="@Style"> @Class.Substring(7)</label>
+                        }
+                        else if (Class.Contains("ABSENT"))
+                        {
+                            <label class="bg-danger text-white py-3" style="@Style">@Class.Substring(6)</label>
+                        }
+                        else if (Class.Contains("LATE"))
+                        {
+                            <label class="bg-warning text-white py-3" style="@Style">@Class.Substring(4)</label>
+                        }
+                        else if (Class.Contains("AUTHOR"))
+                        {
+                            <label class="border border-danger text-danger py-3" style="@Style">@Class</label>
+                        }
+
+                    }
+                </DisplayTemplate>
+            </DataGridColumn>
+            <DataGridColumn TItem="Attendance_Report_Pivots" Field="@nameof(Attendance_Report_Pivots.Class3)" Caption="C3" Editable="false" Filterable="false" Sortable="false">
+                <DisplayTemplate>
+
+                    @{ var Class = (context as Attendance_Report_Pivots)?.Class3;
+                        @if (Class == null)
+                        {
+                            <label class="bg-light text-black-50 py-3" style="@Style"> - </label>
+                        }
+                        else if (Class.Contains("PRESENT"))
+                        {
+                            <label class="bg-success text-white py-3" style="@Style"> @Class.Substring(7)</label>
+                        }
+                        else if (Class.Contains("ABSENT"))
+                        {
+                            <label class="bg-danger text-white py-3" style="@Style">@Class.Substring(6)</label>
+                        }
+                        else if (Class.Contains("LATE"))
+                        {
+                            <label class="bg-warning text-white py-3" style="@Style">@Class.Substring(4)</label>
+                        }
+                        else if (Class.Contains("AUTHOR"))
+                        {
+                            <label class="border border-danger text-danger py-3" style="@Style">@Class</label>
+                        }
+
+                    }
+                </DisplayTemplate>
+            </DataGridColumn>
+            <DataGridColumn TItem="Attendance_Report_Pivots" Field="@nameof(Attendance_Report_Pivots.Class4)" Caption="C4" Editable="false" Filterable="false" Sortable="false">
+                <DisplayTemplate>
+
+                    @{ var Class = (context as Attendance_Report_Pivots)?.Class4;
+                        @if (Class == null)
+                        {
+                            <label class="bg-light text-black-50 py-3" style="@Style"> - </label>
+                        }
+                        else if (Class.Contains("PRESENT"))
+                        {
+                            <label class="bg-success text-white py-3" style="@Style"> @Class.Substring(7)</label>
+                        }
+                        else if (Class.Contains("ABSENT"))
+                        {
+                            <label class="bg-danger text-white py-3" style="@Style">@Class.Substring(6)</label>
+                        }
+                        else if (Class.Contains("LATE"))
+                        {
+                            <label class="bg-warning text-white py-3" style="@Style">@Class.Substring(4)</label>
+                        }
+                        else if (Class.Contains("AUTHOR"))
+                        {
+                            <label class="border border-danger text-danger py-3" style="@Style">@Class</label>
+                        }
+
+                    }
+                </DisplayTemplate>
+            </DataGridColumn>
+            <DataGridColumn TItem="Attendance_Report_Pivots" Field="@nameof(Attendance_Report_Pivots.Class5)" Caption="C5" Editable="false" Filterable="false" Sortable="false">
+                <DisplayTemplate>
+
+                    @{ var Class = (context as Attendance_Report_Pivots)?.Class5;
+                        @if (Class == null)
+                        {
+                            <label class="bg-light text-black-50 py-3" style="@Style"> - </label>
+                        }
+                        else if (Class.Contains("PRESENT"))
+                        {
+                            <label class="bg-success text-white py-3" style="@Style"> @Class.Substring(7)</label>
+                        }
+                        else if (Class.Contains("ABSENT"))
+                        {
+                            <label class="bg-danger text-white py-3" style="@Style">@Class.Substring(6)</label>
+                        }
+                        else if (Class.Contains("LATE"))
+                        {
+                            <label class="bg-warning text-white py-3" style="@Style">@Class.Substring(4)</label>
+                        }
+                        else if (Class.Contains("AUTHOR"))
+                        {
+                            <label class="border border-danger text-danger py-3" style="@Style">@Class</label>
+                        }
+
+                    }
+                </DisplayTemplate>
+            </DataGridColumn>
+            <DataGridColumn TItem="Attendance_Report_Pivots" Field="@nameof(Attendance_Report_Pivots.Class6)" Caption="C6" Editable="false" Filterable="false" Sortable="false">
+                <DisplayTemplate>
+
+                    @{ var Class = (context as Attendance_Report_Pivots)?.Class6;
+                        @if (Class == null)
+                        {
+                            <label class="bg-light text-black-50 py-3" style="@Style"> - </label>
+                        }
+                        else if (Class.Contains("PRESENT"))
+                        {
+                            <label class="bg-success text-white py-3" style="@Style"> @Class.Substring(7)</label>
+                        }
+                        else if (Class.Contains("ABSENT"))
+                        {
+                            <label class="bg-danger text-white py-3" style="@Style">@Class.Substring(6)</label>
+                        }
+                        else if (Class.Contains("LATE"))
+                        {
+                            <label class="bg-warning text-white py-3" style="@Style">@Class.Substring(4)</label>
+                        }
+                        else if (Class.Contains("AUTHOR"))
+                        {
+                            <label class="border border-danger text-danger py-3" style="@Style">@Class</label>
+                        }
+
+                    }
+                </DisplayTemplate>
+            </DataGridColumn>
+            <DataGridColumn TItem="Attendance_Report_Pivots" Field="@nameof(Attendance_Report_Pivots.Class7)" Caption="C7" Editable="false" Filterable="false" Sortable="false">
+                <DisplayTemplate>
+
+                    @{ var Class = (context as Attendance_Report_Pivots)?.Class7;
+                        @if (Class == null)
+                        {
+                            <label class="bg-light text-black-50 py-3" style="@Style"> - </label>
+                        }
+                        else if (Class.Contains("PRESENT"))
+                        {
+                            <label class="bg-success text-white py-3" style="@Style"> @Class.Substring(7)</label>
+                        }
+                        else if (Class.Contains("ABSENT"))
+                        {
+                            <label class="bg-danger text-white py-3" style="@Style">@Class.Substring(6)</label>
+                        }
+                        else if (Class.Contains("LATE"))
+                        {
+                            <label class="bg-warning text-white py-3" style="@Style">@Class.Substring(4)</label>
+                        }
+                        else if (Class.Contains("AUTHOR"))
+                        {
+                            <label class="border border-danger text-danger py-3" style="@Style">@Class</label>
+                        }
+
+                    }
+                </DisplayTemplate>
+            </DataGridColumn>
+            <DataGridColumn TItem="Attendance_Report_Pivots" Field="@nameof(Attendance_Report_Pivots.Class8)" Caption="C8" Editable="false" Filterable="false" Sortable="false">
+                <DisplayTemplate>
+
+                    @{ var Class = (context as Attendance_Report_Pivots)?.Class8;
+                        @if (Class == null)
+                        {
+                            <label class="bg-light text-black-50 py-3" style="@Style"> - </label>
+                        }
+                        else if (Class.Contains("PRESENT"))
+                        {
+                            <label class="bg-success text-white py-3" style="@Style"> @Class.Substring(7)</label>
+                        }
+                        else if (Class.Contains("ABSENT"))
+                        {
+                            <label class="bg-danger text-white py-3" style="@Style">@Class.Substring(6)</label>
+                        }
+                        else if (Class.Contains("LATE"))
+                        {
+                            <label class="bg-warning text-white py-3" style="@Style">@Class.Substring(4)</label>
+                        }
+                        else if (Class.Contains("AUTHOR"))
+                        {
+                            <label class="border border-danger text-danger py-3" style="@Style">@Class</label>
+                        }
+
+                    }
+                </DisplayTemplate>
+            </DataGridColumn>
+            <DataGridColumn TItem="Attendance_Report_Pivots" Field="@nameof(Attendance_Report_Pivots.Class9)" Caption="C9" Editable="false" Filterable="false" Sortable="false">
+                <DisplayTemplate>
+
+                    @{ var Class = (context as Attendance_Report_Pivots)?.Class9;
+                        @if (Class == null)
+                        {
+                            <label class="bg-light text-black-50 py-3" style="@Style"> - </label>
+                        }
+                        else if (Class.Contains("PRESENT"))
+                        {
+                            <label class="bg-success text-white py-3" style="@Style"> @Class.Substring(7)</label>
+                        }
+                        else if (Class.Contains("ABSENT"))
+                        {
+                            <label class="bg-danger text-white py-3" style="@Style">@Class.Substring(6)</label>
+                        }
+                        else if (Class.Contains("LATE"))
+                        {
+                            <label class="bg-warning text-white py-3" style="@Style">@Class.Substring(4)</label>
+                        }
+                        else if (Class.Contains("AUTHOR"))
+                        {
+                            <label class="border border-danger text-danger py-3" style="@Style">@Class</label>
+                        }
+
+                    }
+                </DisplayTemplate>
+            </DataGridColumn>
+
+    </DataGrid>
+}
+
+
+
+@code {
+    [Parameter]
+    public string Campus { get; set; }
+
+    public DateTime CurrDate = DateTime.Now.Date;
+
+    List<Attendance_Report_Pivots> AttendanceReports;
+    List<Summary1> SummaryList;
+    List<Notes_Status> NotesStatus;
+    List<Notes_Table> NotesTableList;
+
+    public string Style = "text-align:center; font-size:12px; width:100%; height:100%;";
+
+    public string LoginCode = "";
+    public string Passcode = "";
+    public string LoginStatus = "";
+    private bool edit_real = true;
+
+    bool isLoading = false;
+    bool spinning = false;
+
+
+
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        spinning = true;
+        await Task.Run(() => LongOperation());
+        AttendanceReports = await _Reps.GetReportsPerDateCampus(Campus, CurrDate);
+        SummaryList = await _Sum.GetSummaryList(Campus, CurrDate, CurrDate);
+        spinning = false;
+        await Task.CompletedTask;
+
+
+    }
+
+    protected void LongOperation()
+    {
+        Task.Delay(10).Wait();
+        isLoading = false;
+    }
+
+    protected async Task SetDate()
+    {
+
+        isLoading = true;
+        spinning = true;
+        StateHasChanged();
+        await Task.Run(() => LongOperation());
+        AttendanceReports = await _Reps.GetReportsPerDateCampus(Campus, CurrDate);
+        SummaryList = await _Sum.GetSummaryList(Campus, CurrDate, CurrDate);
+        spinning = false;
+        await Task.CompletedTask;
+
+    }
+
+    void OnSelectedRowStyling(Attendance_Report_Pivots Attendance_Report_Pivots, DataGridRowStyling styling)
+    {
+        styling.Background = Background.Light;
+
+    }
+
+    void OnRowStyling(Attendance_Report_Pivots Attendance_Report_Pivots, DataGridRowStyling styling)
+    {
+        styling.Style = "vertical-align: middle;";
+
+    }
+
+}

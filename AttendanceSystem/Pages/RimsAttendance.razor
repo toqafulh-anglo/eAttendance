@@ -1,0 +1,49 @@
+﻿@using AttendanceSystem.Data
+@inject iRepository64AttendanceRims _RIMS
+
+
+<span>
+    @if (AttendanceRimsList64 == null)
+    {
+        <label style="font-weight:bold">Loading...</label>
+    }
+    else
+    {
+        @foreach (var ss in AttendanceRimsList64)
+        {
+            @if (ss.PIN == null || ss.PIN == "")
+            {
+                <label style="color:red; font-weight:bold">No DATA</label>
+            }
+            else
+            {
+                <label style="color:green; font-weight:bold; font-size:8pt;">@ss.inTime</label>
+            }
+
+        }
+    }
+</span>
+
+
+@code {
+    [Parameter]
+    public string Scode { get; set; }
+
+    Models.C64AttendanceRims AttendanceRims64 = new Models.C64AttendanceRims();
+    List<Models.C64AttendanceRims> AttendanceRimsList64;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            AttendanceRims64 = await _RIMS.GetrimsAttendance(Scode);
+            AttendanceRimsList64 = await _RIMS.GetAttendanceRimsList(Scode);
+        }
+        catch
+        {
+            throw;
+        }
+    }
+
+}

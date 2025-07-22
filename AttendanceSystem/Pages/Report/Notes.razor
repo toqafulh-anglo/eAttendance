@@ -1,0 +1,133 @@
+﻿@inject iRepositoryReports _Reps
+@inject iRepositoryNotesTable _NT
+@inject iRepositoryNotesStatus _NS
+@inject iRepositoryAttendance _AT
+@inject iRepositoryAttendanceRecord _ATRec
+
+
+
+
+@if (NotesTable == null)
+{
+
+    <button type="button" class="btn btn-outline-info" @onclick="ClickAdd" style="@DisplayNone"> New </button>
+    <span class="form-group" style="@CommentNoticeCss">
+
+        <textarea class="py-2" rows="2" style="@CommentNoticeCss font-size:12px;" @bind="Comment"></textarea><br />
+
+        <button type="button" class="btn btn-success text-white" @onclick="AddNotes" style="@CommentNoticeCss font-size:13px;"> Add </button>
+        <button type="button" class="btn btn-outline-danger" @onclick="Cancel" style="@CommentNoticeCss font-size:13px;"> Cancel </button>
+
+
+    </span>
+}
+else
+{
+    <span style="@DisplayFlex">
+        <textarea style="font-size:12px;" disabled>@Comment</textarea> &nbsp;
+        <button type="button" class="btn btn-info " @onclick="ClickAdd"> Add </button>
+
+    </span>
+    <span class="form-group">
+        @* <label style="@DisplayNone">@Comment</label>*@
+        @*<span colspan="2" style="vertical-align:middle; height:150px;">
+                <textarea style="font-size:12px;" disabled>@Comment</textarea>
+                <button type="button" class="btn btn-info" @onclick="ClickAdd" style=" font-size:13px;"> Edit </button>
+            </span>*@
+
+
+        <textarea class="py-2" rows="2" style="@CommentNoticeCss font-size:12px;" @bind="Comment"></textarea><br />
+        <button type="button" class="btn btn-success text-white" @onclick="EditNotes" style="@CommentNoticeCss  font-size:13px; "> Save </button>
+        <button type="button" class="btn btn-outline-danger" @onclick="Cancel" style="@CommentNoticeCss font-size:13px;"> Cancel </button>
+    </span>
+}
+
+
+
+
+@code {
+    [Parameter]
+    public string id { get; set; }
+
+    [Parameter]
+    public string Campus { get; set; }
+
+    [Parameter]
+    public string SubjectClass { get; set; }
+
+    [Parameter]
+    public string TName { get; set; }
+
+    [Parameter]
+    public DateTime Currdate { get; set; }
+
+    public string CommentNoticeCss = "display: none;";
+    public string DisplayNone = "display: block;";
+    public string DisplayFlex = "display: flex;  align-items: center;";
+    public string Comment = "";
+
+
+    public DateTime CurrDate = DateTime.Now.Date;
+
+
+    Models.Notes_Table NotesTable = new Models.Notes_Table();
+    List<Attendance_Report_Pivots> AttendanceReports;
+    List<Notes_Status> NotesStatus;
+    List<Notes_Table> NotesTableList;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        NotesTable = await _NT.GetNotes(Convert.ToInt32(id), Currdate);
+        NotesStatus = await _NS.GetNoteList();
+
+        if (NotesTable != null)
+        {
+            Comment = NotesTable.Note_Text;
+        }
+
+
+    }
+
+    protected void ClickAdd()
+    {
+        CommentNoticeCss = "display: inline-block;";
+        DisplayNone = "display: none;";
+        DisplayFlex = "display: none;";
+
+
+    }
+
+    protected async Task AddNotes()
+    {
+        await _NT.AddNotes(id, Comment, Convert.ToInt32(id), Currdate);
+
+        await Refresh();
+    }
+
+    protected async Task EditNotes()
+    {
+
+        NotesTable.Note_Text = Comment;
+        await _NT.UpdateNotes(NotesTable);
+        await Refresh();
+    }
+
+    protected void Cancel()
+    {
+        CommentNoticeCss = "display: none;";
+        DisplayNone = "display: block;";
+        DisplayFlex = "display: flex;  align-items: center;";
+    }
+
+    private async Task Refresh()
+    {
+
+        NotesTable = await _NT.GetNotes(Convert.ToInt32(id), Currdate);
+        CommentNoticeCss = "display: none;";
+        DisplayNone = "display: block;";
+        DisplayFlex = "display: flex;  align-items: center;";
+
+    }
+}

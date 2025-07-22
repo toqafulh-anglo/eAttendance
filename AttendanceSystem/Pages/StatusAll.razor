@@ -1,0 +1,76 @@
+﻿@using AttendanceSystem.Data
+@inject iRepositoryPASSData _Pass
+@inject iRepositoryAttendance _AT
+@inject iRepositoryAttendanceRecord _ATRec
+@inject NavigationManager Navmanager
+
+
+
+<button class="btn btn-success" type="button" @onclick="UpdateSTATUSALL">ALL PRESENT</button>
+
+
+@code {
+    [Parameter]
+    public String SubjectClass { get; set; }
+
+    [Parameter]
+    public string TCode { get; set; }
+
+
+
+    Models.Attendances Attendance = new Models.Attendances();
+
+    List<Models.PASSDatas> PassdataStudents;
+
+    private string StatusAllPRESENT = "PRESENT";
+    private string StatusAllABSENT = "ABSENT";
+    private string Notes = " ";
+
+    public string Scode = "";
+
+    bool isLoading = false;
+    bool spinning = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        PassdataStudents = await _Pass.GetStudentList(SubjectClass, TCode);
+
+
+
+    }
+
+
+    protected async Task UpdateSTATUSALL()
+    {
+        foreach(var ps in PassdataStudents)
+        {
+            isLoading = true;
+            spinning = true;
+            await Task.Run(() => LongOperation());
+            await _AT.AddPresentAlls(ps.DESCRIPTION, ps.TName, ps.TName, StatusAllPRESENT, Notes);
+            StateHasChanged();
+            spinning = false;
+            await Task.CompletedTask;
+            await Refresh();
+        }
+
+
+
+
+    }
+
+    protected void LongOperation()
+    {
+        Task.Delay(500).Wait();
+        isLoading = false;
+    }
+
+    private async Task Refresh()
+    {
+        @foreach(var ps in PassdataStudents)
+        {
+            Attendance = await _AT.GetCurrentAttendance(ps.SCode, SubjectClass, ps.TName);
+        }
+    }
+}

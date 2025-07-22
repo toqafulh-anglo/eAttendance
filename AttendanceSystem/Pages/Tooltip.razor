@@ -1,0 +1,121 @@
+﻿@using AttendanceSystem.Data
+@inject iRepositoryAttendance _AT
+
+<style>
+    .tooltip-wrapper {
+        position: relative;
+        display: inline-block;
+        border-bottom: 1px dotted black;
+        cursor: help;
+    }
+
+    #spanText {
+        visibility: hidden;
+        position: absolute;
+        width: 300px;
+        bottom: 100%;
+        left: 10%;
+        margin-left: 0px;
+        background-color: #363636;
+        color: #fff;
+        text-align: left;
+        padding: 5px 0;
+        border-radius: 6px;
+        z-index: 1;
+        font-size: 8pt;
+
+    }
+
+        #spanText::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #555 transparent transparent transparent;
+        }
+
+    .tooltip-wrapper:hover #spanText {
+        visibility: visible;
+    }
+</style>
+
+<div class="tooltip-wrapper">
+
+    @if (AttenDanceNoRemarks == null)
+    {
+        <span>@Text</span>
+    }
+    else
+    {
+        @if (checknoremarks == "")
+        {
+           
+        }
+        else
+        {
+            <span style="background-color:blue">@ChildContent </span>
+            <span id="spanText">
+                @foreach (var marks in AttenDanceNoRemarks)
+                {
+
+                    @if (marks.NOTES == "")
+                    {
+                        @marks.STATUS <label> ( </label> @marks.SubjectClass <label> ) </label><br />
+                    }
+                    else if (marks.NOTES == " ")
+                    {
+                        @marks.STATUS <label> ( </label> @marks.SubjectClass <label> ) </label><br />
+                    }
+                    else
+                    {
+                        @marks.STATUS <label> ( </label> @marks.SubjectClass <label> ) - </label> @marks.NOTES <br />
+                    }
+                }
+
+            </span>
+
+        }
+
+
+
+    }
+</div>
+
+@code {
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public string Text { get; set; }
+
+
+
+    List<Models.Attendances> AttenDance;
+    List<Models.Attendances> AttenDanceNoRemarks;
+
+    private string check = "";
+    private string checknoremarks = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            AttenDance = await _AT.GetStudentAttendanceRemarks(Text);
+            foreach (var ss in AttenDance)
+            {
+                check = ss.STATUS;
+            }
+            AttenDanceNoRemarks = await _AT.GetStudentAttendanceNORemarks(Text);
+            foreach (var ss in AttenDanceNoRemarks)
+            {
+                checknoremarks = ss.STATUS;
+                check = ss.NOTES;
+            }
+        }
+        catch
+        {
+            throw;
+        }
+    }
+
+}

@@ -1,0 +1,307 @@
+﻿@using AttendanceSystem.Data
+@inject iRepositoryPASSData _Pass
+@inject iRepositoryAttendance _AT
+@inject iRepositoryAttendanceRecord _ATRec
+@inject NavigationManager Navmanager
+
+
+@*<td>
+    @if (Attendance.NOTES == " ")
+    { }
+    else
+    {
+
+    }
+</td>*@
+
+<td style="vertical-align:middle;">
+    <button type="button" class="btn btn-success" @onclick="SubmitAttendancePresent">
+        <span class="oi oi-circle-check" aria-hidden="true"></span>
+    </button>
+</td>
+<td style="vertical-align:middle;">
+    <button type="button" class="btn btn-danger" @onclick="SubmitAttendanceABSENT">
+        <span class="oi oi-circle-x" aria-hidden="true"></span>
+    </button>
+</td>
+<td style="vertical-align:middle;">
+    <button type="button" class="btn btn-warning" @onclick="SubmitAttendanceLATE">
+        <span class="oi oi" aria-hidden="true" style="font-family:Arial;color:white;">L</span>
+    </button>
+</td>
+
+@if (Attendance == null)
+{
+    <td style="vertical-align:middle;" colspan="2"></td>
+}
+else
+{
+
+    @if (Attendance.STATUS == "PRESENT")
+    {
+        <td style="vertical-align:middle; text-align:center;" colspan="2">
+            <span class="border border-success rounded  text-success px-2 py-2 ">@Attendance.STATUS</span>
+        </td>
+    }
+    else if (Attendance.STATUS == "ABSENT")
+    {
+        <td style="vertical-align:middle; text-align:center;" colspan="2">
+            <span class="border border-danger rounded text-danger  px-2 py-2">@Attendance.STATUS</span>
+        </td>
+    }
+    else if (Attendance.STATUS == "LATE")
+    {
+        <td style="vertical-align:middle; text-align:center;" colspan="2">
+            <span class="border border-warning rounded text-warning px-2 py-2">@Attendance.STATUS</span>
+        </td>
+    }
+    else
+    {
+        <td style="vertical-align:middle;" colspan="2"></td>
+    }
+}
+
+@if (Attendance == null)
+{
+    <td style="vertical-align:middle;" colspan="2"></td>
+
+}
+else
+{
+    <td style="vertical-align:middle;" colspan="2">
+        <span style="@DisplayFlex;vertical-align:middle">
+            <textarea style="font-size:12px;" disabled>@Comment</textarea> &nbsp;
+            <button type="button" class="btn btn-info " @onclick="ClickAdd"> Add </button>
+
+        </span>
+        <span>
+            @*<label style="@DisplayNone">@Comment</label>
+                <span colspan="2" style="vertical-align:middle; height:150px;">
+                        <textarea style="font-size:12px;" disabled>@Comment</textarea>
+                        <button type="button" class="btn btn-info" @onclick="ClickAdd" style=" font-size:13px;"> Edit </button>
+                    </span>*@
+
+
+            <textarea rows="2" style="@CommentNoticeCss font-size:11px; vertical-align:middle;" @bind="Comment"></textarea><br />
+            <button type="button" class="btn btn-success text-white" @onclick="EditNotes" style="@CommentNoticeCss  font-size:11px; "> Save </button>
+            <button type="button" class="btn btn-outline-danger" @onclick="Cancel" style="@CommentNoticeCss font-size:11px;"> Cancel </button>
+
+        </span>
+
+    </td>
+}
+
+
+
+
+
+
+@code {
+    [Parameter]
+    public string Scode { get; set; }
+
+    [Parameter]
+    public string SubjectClass { get; set; }
+
+    [Parameter]
+    public string TName { get; set; }
+
+    [Parameter]
+    public string Tcode { get; set; }
+
+    public string CommentNoticeCss = "display: none;";
+    public string DisplayNone = "display: block;";
+    public string DisplayFlex = "display: flex;  align-items: center;";
+    public string Comment = "";
+    public DateTime CurrDate = DateTime.Now.Date;
+
+
+    Models.Attendances Attendance = new Models.Attendances();
+    Models.AttendanceRecords AttendanceRecord = new Models.AttendanceRecords();
+
+
+    public string GETURL = "ertiefgsahfvgweoqfgasldhpwfgqwefgwadgfqwiuefkjafuqewrtq";
+    public string GETURLS = "xmvsmxbcsdgrtfqeakdvlagdqwefrasfvqwerffwjf";
+    public DateTime currdate = DateTime.Now.Date;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        Attendance = await _AT.GetCurrentAttendance(Scode, SubjectClass, TName);
+        AttendanceRecord = await _ATRec.GetCurrentAttendanceRecord(Scode, SubjectClass, TName, currdate);
+        if (Attendance != null)
+        {
+            Comment = Attendance.NOTES;
+        }
+        StateHasChanged();
+    }
+
+
+
+    protected async Task SubmitAttendancePresent()
+    {
+
+
+
+        if (Attendance == null && AttendanceRecord == null)
+        {
+
+            await _AT.AddNewAttendance(Scode, SubjectClass, TName, "PRESENT", TName);
+            await _ATRec.AddNewAttendanceRecord(Scode, SubjectClass, TName, "PRESENT", TName);
+            await Refresh();
+
+        }
+        else
+        {
+
+            AttendanceRecord.TimeStamp = DateTime.Now;
+            AttendanceRecord.CurrentDate = DateTime.Now.Date;
+            AttendanceRecord.STATUS = "PRESENT";
+            AttendanceRecord.StudentCode = Scode;
+            AttendanceRecord.SubjectClass = SubjectClass;
+            AttendanceRecord.TeacherName = TName;
+            AttendanceRecord.NOTES = "";
+
+            await _ATRec.UpdateAttendanceRecord(AttendanceRecord);
+
+
+
+
+            Attendance.TimeStamp = DateTime.Now;
+            Attendance.CurrentDate = DateTime.Now.Date;
+            Attendance.STATUS = "PRESENT";
+            Attendance.StudentCode = Scode;
+            Attendance.SubjectClass = SubjectClass;
+            Attendance.TeacherName = TName;
+            Attendance.NOTES = "";
+
+            await _AT.UpdateAttendance(Attendance);
+            await Refresh();
+        }
+    }
+
+
+    protected async Task SubmitAttendanceABSENT()
+    {
+
+        if (Attendance == null && AttendanceRecord == null)
+        {
+
+            await _AT.AddNewAttendance(Scode, SubjectClass, TName, "ABSENT", TName);
+            await _ATRec.AddNewAttendanceRecord(Scode, SubjectClass, TName, "ABSENT", TName);
+            await Refresh();
+
+        }
+        else
+        {
+
+            AttendanceRecord.TimeStamp = DateTime.Now;
+            AttendanceRecord.CurrentDate = DateTime.Now.Date;
+            AttendanceRecord.STATUS = "ABSENT";
+            AttendanceRecord.StudentCode = Scode;
+            AttendanceRecord.SubjectClass = SubjectClass;
+            AttendanceRecord.TeacherName = TName;
+            AttendanceRecord.NOTES = "";
+
+            await _ATRec.UpdateAttendanceRecord(AttendanceRecord);
+
+
+            Attendance.TimeStamp = DateTime.Now;
+            Attendance.CurrentDate = DateTime.Now.Date;
+            Attendance.STATUS = "ABSENT";
+            Attendance.StudentCode = Scode;
+            Attendance.SubjectClass = SubjectClass;
+            Attendance.TeacherName = TName;
+            Attendance.NOTES = "";
+
+
+            await _AT.UpdateAttendance(Attendance);
+            await Refresh();
+
+        }
+    }
+
+    protected async Task SubmitAttendanceLATE()
+    {
+
+        if (Attendance == null && AttendanceRecord == null)
+        {
+
+            await _AT.AddNewAttendance(Scode, SubjectClass, TName, "LATE", TName);
+            await _ATRec.AddNewAttendanceRecord(Scode, SubjectClass, TName, "LATE", TName);
+            await Refresh();
+
+        }
+        else
+        {
+
+            AttendanceRecord.TimeStamp = DateTime.Now;
+            AttendanceRecord.CurrentDate = DateTime.Now.Date;
+            AttendanceRecord.STATUS = "LATE";
+            AttendanceRecord.StudentCode = Scode;
+            AttendanceRecord.SubjectClass = SubjectClass;
+            AttendanceRecord.TeacherName = TName;
+            AttendanceRecord.NOTES = "";
+
+            await _ATRec.UpdateAttendanceRecord(AttendanceRecord);
+
+
+            Attendance.TimeStamp = DateTime.Now;
+            Attendance.CurrentDate = DateTime.Now.Date;
+            Attendance.STATUS = "LATE";
+            Attendance.StudentCode = Scode;
+            Attendance.SubjectClass = SubjectClass;
+            Attendance.TeacherName = TName;
+            Attendance.NOTES = "";
+
+            await _AT.UpdateAttendance(Attendance);
+            await Refresh();
+
+        }
+    }
+
+    protected void ClickAdd()
+    {
+        CommentNoticeCss = "display: inline-block;";
+        DisplayNone = "display: none;";
+        DisplayFlex = "display: none;";
+
+
+    }
+
+    //protected async Task AddNotes()
+    //{
+    //    await _NT.AddNotes(id, Comment, Convert.ToInt32(id), CurrDate);
+
+    //    await Refresh();
+    //}
+
+    protected async Task EditNotes()
+    {
+
+        AttendanceRecord.NOTES = Comment;
+        Attendance.NOTES = Comment;
+        await _ATRec.UpdateAttendanceRecord(AttendanceRecord);
+        await _AT.UpdateAttendance(Attendance);
+        await Refresh();
+    }
+
+    protected void Cancel()
+    {
+        CommentNoticeCss = "display: none;";
+        DisplayNone = "display: block;";
+        DisplayFlex = "display: flex;  align-items: center;";
+    }
+
+    private async Task Refresh()
+    {
+        StateHasChanged();
+        Attendance = await _AT.GetCurrentAttendance(Scode, SubjectClass, TName);
+
+        AttendanceRecord = await _ATRec.GetCurrentAttendanceRecord(Scode, SubjectClass, TName, currdate);
+        CommentNoticeCss = "display: none;";
+        DisplayNone = "display: block;";
+        DisplayFlex = "display: flex;  align-items: center;";
+    }
+
+}

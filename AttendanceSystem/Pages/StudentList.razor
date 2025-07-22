@@ -1,0 +1,312 @@
+﻿@page "/StudentList"
+@page "/StudentList/{GETURL}/{DESCRIPT}/{GETURLS}/{TCode}"
+@using AttendanceSystem.Data
+@using System.Globalization
+@inject iRepositoryPASSData _PassD
+@inject iRepositoryTeacher_Picture _TP
+@inject iRepositoryStudent_Image _SP
+@inject iRepositoryAttendance _AT
+@inject Student_ImagesCRUD Studcrud
+
+@inject NavigationManager NavManager
+
+
+<center>
+    <div class="container" style="font-family:Verdana, Geneva, Tahoma, sans-serif;">
+        <div class="row pt-3">
+            @if (isLoading == true)
+            {
+                <br /><br />
+                <SpinLoader IsLoading="isLoading">
+                    <LoadingTemplate>
+
+                        <div class="col">
+                            <br /> <br /> <br />
+                            <Plane Center="true" Size="80px" Color="black"></Plane>
+
+                        </div>
+
+                    </LoadingTemplate>
+
+                </SpinLoader>
+            }
+            else
+            {
+                <div class="col-md">
+                    <div class="row justify-content-center">
+                        <div class="col card mx-6" style="border-radius:15px; box-shadow: 1px 1px 10px 1px #000;">
+                            <center>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <br />
+                                        @if (PassdataStudents == null)
+                                        {
+
+                                        }
+                                        else
+                                        {
+
+
+                                            @if (TeacherPics.TPicture == null)
+                                            {
+                                                <img src="/img/example.jpg" height="120" width="120" style="border-radius:50%;border: 6px solid cornflowerblue;" />
+                                                <br />
+                                            }
+                                            else
+                                            {
+                                                <img src="@ImageToDisplay(TeacherPics.TPicture)" height="120" width="120" style="border-radius:50%;border: 6px solid cornflowerblue;" />
+                                                <br />
+                                            }
+                                        }
+
+                                        <br />
+
+                                    </div>
+                                    <div class="col-md-5" style="text-align:center;">
+                                        <br /> <br />
+                                        <label style="font-weight:bold; font-size: 15px;"> @TeacherPics.TName</label> <br />
+                                        <label style="font-weight:bold; font-size: 12px;"> @TeacherPics.TEmail</label> <br />
+                                        <label style="font-weight:bold; font-size:15px;"><u> @DESCRIPT </u></label> <br />
+                                    </div>
+                                    <div class="col-md">
+                                        <br />
+                                        <button type="button" class="btn btn-info" @onclick="@Back">
+                                            <span class="oi oi" aria-hidden="true" style="font-family:Arial;color:white;">BACK</span>
+                                        </button>
+                                        &nbsp;&nbsp;
+                                        <button type="button" class="btn btn-danger" @onclick="@Logout">
+                                            <span class="oi oi" aria-hidden="true" style="font-family:Arial;color:white;">LOGOUT</span>
+                                        </button>
+                                        <div class="col pt-5">
+                                           
+                                            <button class="btn btn-success" type="button" @onclick="@(() => UpdateSTATUSALL("PRESENT"))">ALL PRESENT</button>
+                                            @*<button class="btn btn-danger" type="button" @onclick="@(() => UpdateSTATUSALL("ABSENT"))">ALL ABSENT</button>*@
+                                           
+                                        </div>
+                                        <br />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col">
+                                        Today's date: <b>@datenow</b>
+                                    </div>
+                                </div>
+                                <br />
+                            </center>
+
+
+
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row justify-content-center">
+                        <div class="col card mx-6" style="border-radius:15px; box-shadow: 1px 1px 5px 1px #000; margin-bottom:30px;">
+                            <br />
+                            <div class="row">
+                                <div class="col">
+                                    **If a student is present in school, but missing in class for more than 10 minutes, please report to the Thai Director immediately**
+                                </div>
+                                <br /><br />
+                            </div>
+                            <table class="table table-responsive-xl table-responsive-lg table-responsive-md table-responsive-sm table-striped">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th colspan="4" style="text-align:center;">STUDENT LIST</th>
+                                        <th colspan="3" style="text-align:center;">OPTIONS</th>
+                                        <th style="text-align:center;" colspan="2">STATUS</th>
+                                        <th style="text-align:center;" colspan="2">REMARKS</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    @if (PassdataStudents == null)
+                                    {
+
+                                    }
+                                    else
+                                    {
+
+                                        @foreach (var ps in PassdataStudents)
+                                        {
+
+                                    <tr>
+                                        <td style="vertical-align:bottom;">@count().</td>
+                                        @if (@ImageToDisplay(Studcrud.GetStudentImagesCRUD(ps.SCode).SPicture) == null)
+                                        {
+                                    <td>
+                                        <img src="/img/example.jpg" height="50" width="50" /><br />
+
+                                        <AttendanceSystem.Pages.Tooltip Text="@ps.SCode"><span class="btn btn-warning oi oi-info" aria-hidden="true"></span>
+                                        </AttendanceSystem.Pages.Tooltip>
+                                    </td>
+                                           
+                                        }
+                                        else
+                                        {
+                                    <td style="align-content:center;vertical-align:middle;">
+                                        <img src="@ImageToDisplay(Studcrud.GetStudentImagesCRUD(ps.SCode).SPicture)" width="50" height="50" />
+                                            <AttendanceSystem.Pages.Tooltip Text="@ps.SCode"><span class="btn btn-warning oi oi-info" aria-hidden="true"></span>
+                                        </AttendanceSystem.Pages.Tooltip>
+                                    </td>
+                                            
+                                        }
+
+
+                                    <td colspan="2" style="vertical-align:middle;text-align:left;font-size:12px;">@ps.SNickname (@ps.Class)<br />
+                                        <AttendanceSystem.Pages.RimsAttendance Scode="@ps.SCode"></AttendanceSystem.Pages.RimsAttendance>
+                                      
+                                    </td>
+
+                                        <AttendanceSystem.Pages.AttendanceOptions Scode="@ps.SCode" SubjectClass="@DESCRIPT" TName="@ps.TName" Tcode="@TCode"></AttendanceSystem.Pages.AttendanceOptions>
+
+
+
+                                    </tr>
+
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+                <br /><br />
+                @*<div class="col-md-auto"></div>*@
+            }
+
+
+        </div>
+    </div>
+
+</center>
+
+
+
+
+
+
+@code {
+    [Parameter]
+    public string GETURL { get; set; }
+    [Parameter]
+    public string DESCRIPT { get; set; }
+    [Parameter]
+    public string GETURLS { get; set; }
+    [Parameter]
+    public string TCode { get; set; }
+
+    private string longstr = "ertiequwgfasdfbqwoetwoqrewqprgfsadkvcapweyrt2pqregwjfalw9yrweryw";
+
+    private string StatusAllPRESENT = "PRESENT";
+    private string StatusAllABSENT = "ABSENT";
+    private string Notes = " ";
+    private string testlang = "";
+
+    public string Scode = "";
+    public string datenow;
+
+
+
+    protected int Counter = 0;
+
+    List<Models.PASSDatas> PassdataStudents;
+    List<Models.Attendances> Records;
+    Models.Teacher_Pictures TeacherPics = new Models.Teacher_Pictures();
+    Models.Student_Images StudentPics = new Models.Student_Images();
+    Models.PASSDatas students = new Models.PASSDatas();
+    Models.Attendances Attendance = new Models.Attendances();
+    Models.AttendanceRecords AttendanceRecord = new Models.AttendanceRecords();
+    List<Models.Attendances> AttendancesRems;
+    Models.C64AttendanceRims AttendanceRims64 = new Models.C64AttendanceRims();
+
+    bool isLoading = false;
+    bool spinning = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        datenow = DateTime.Now.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture);
+        isLoading = true;
+        spinning = true;
+        await Task.Run(() => LongOperation());
+
+        TeacherPics = await _TP.GetTeacherPicture(TCode);
+        PassdataStudents = await _PassD.GetStudentList(DESCRIPT, TCode);
+        foreach(var ps in PassdataStudents)
+        {
+            Scode = ps.SCode;
+        }
+
+        Counter = 1;
+
+        spinning = false;
+        await Task.CompletedTask;
+
+    }
+
+
+    protected int count()
+    {
+        return Counter++;
+    }
+
+
+    protected void LongOperation()
+    {
+        Task.Delay(10).Wait();
+        isLoading = false;
+    }
+
+
+    string ImageToDisplay(byte[] image)
+    {
+        if (image != null)
+        {
+            var base64 = Convert.ToBase64String(image);
+            var fs = string.Format("data:image/jpg;base64,{0}", base64);
+            return fs;
+        }
+        return "";
+    }
+
+    protected void Logout()
+    {
+        NavManager.NavigateTo("/");
+    }
+
+    protected void Back()
+    {
+        NavManager.NavigateTo("/TeacherClassList/" + longstr + "/" + TCode);
+    }
+
+
+    protected async Task UpdateSTATUSALL(String Status)
+    {
+        isLoading = true;
+        spinning = true;
+        await Task.Run(() => LongOperation());
+
+        await _AT.AddPresentAlls(DESCRIPT, TeacherPics.TName, TeacherPics.TName, Status, Notes);
+
+        spinning = false;
+        await Task.CompletedTask;
+
+        StateHasChanged();
+        await Refresh();
+
+    }
+
+
+    private async Task Refresh()
+    {
+
+        TeacherPics = await _TP.GetTeacherPicture(TCode);
+        PassdataStudents = await _PassD.GetStudentList(DESCRIPT, TCode);
+
+
+        Counter = 1;
+
+    }
+}

@@ -1,0 +1,238 @@
+﻿@page "/TeacherClassList/ertiequwgfasdfbqwoetwoqrewqprgfsadkvcapweyrt2pqregwjfalw9yrweryw/{TeacherCode}"
+@using AttendanceSystem.Data
+@inject iRepositoryPASSData _PassD
+@inject iRepositoryTeacher_Picture _TP
+@inject NavigationManager NavManager
+
+
+
+<center>
+    <div class="container" style="font-family:Verdana, Geneva, Tahoma, sans-serif;">
+        <div class="row pt-3">
+            @if (isLoading == true)
+            {
+                <br /><br />
+                <SpinLoader IsLoading="isLoading">
+                    <LoadingTemplate>
+
+                        <div class="col">
+                            <br /> <br /> <br />
+                            <Plane Center="true" Size="80px" Color="black"></Plane>
+
+                        </div>
+
+                    </LoadingTemplate>
+
+                </SpinLoader>
+            }
+            else
+            {
+                <div class="col-md-3 mx-3">
+                    <div class="row justify-content-center">
+                        <div class="col card" style="border-radius:15px; box-shadow: 1px 1px 10px 1px #000; ">
+
+                            <center>
+                                <div class="col-sm-auto embed-responsive">
+                                    <br />
+                                    @if (Passdata == null)
+                                    {
+
+
+                                    }
+                                    else
+                                    {
+                                        if (Teacher == null)
+                                        {
+
+                                        }
+                                        else
+                                        {
+                                            @if (TeacherPics.TPicture == null)
+                                            {
+                                                <img src="/img/example.jpg" height="145" width="145" style="border-radius:50%;border: 6px solid cornflowerblue;" /> <br /> <br />
+                                                <label style="font-weight:bold; font-size: 15px;"> @Teacher.TName</label> <br /> 
+                                                @*<label style="font-weight:bold; font-size: 12px;"> @Teacher.TEmail</label> <br />*@
+                                                <br />
+                                            }
+                                            else
+                                            {
+                                                <img src="@ImageToDisplay(TeacherPics.TPicture)" height="145" width="145" style="border-radius:50%;border: 6px solid cornflowerblue;" /> <br /> <br />
+                                                <label style="font-weight:bold; font-size: 15px;"> @Teacher.TName</label> <br />
+                                                <label style="font-weight:bold; font-size: 12px;"> @TeacherPics.TEmail</label> <br />
+
+                                            }
+                                        }
+
+
+                                    }
+
+                                </div>
+                            </center>
+                        </div>
+                    </div>
+                    <div class="row justify-content-center">
+                        <div class="col my-4">
+
+                            <button type="button" class="btn btn-danger" @onclick="@Logout">
+                                <span class="oi oi" aria-hidden="true" style="font-family:Arial;color:white;">LOGOUT</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md">
+                    <div class="row justify-content-center">
+                        <div class="col card mx-6" style="border-radius:15px; box-shadow: 1px 1px 5px 1px #000; ">
+                            <br />
+                            <table class="table table-striped">
+
+                                <thead class="thead-dark" style="font-size:17px;">
+                                    <tr>
+                                        <th class="sticky-top" colspan="2">TEACHER CLASS LIST</th>
+                                        <th class="sticky-top" style="text-align:center;">MORE THAN 1 CLASS SESSION</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody style="font-size:14px;">
+
+                                    @if (Passdata == null)
+                                    {
+
+                                    }
+                                    else
+                                    {
+                                        @foreach (var pass in Passdata)
+                                        {
+                                    <tr>
+                                        <td valign="middle">@count().</td>
+                                        <td><a href="/StudentList/@GETURL/@pass.DESCRIPTION/@GETURLS/@pass.TCode" style="font-size:16px;">@pass.DESCRIPTION</a></td>
+
+
+                                        @if (pass.DESCRIPTION.Contains("Session"))
+                                        {
+                                            <td></td>
+                                        }
+                                        else
+                                        {
+                                           
+                                            <td style="text-align:center;font-size:16px;"><button class="btn btn-info" @onclick="(() => AddClassSession(pass.DESCRIPTION))">Add Session</button></td>
+                                        }
+                                    </tr>
+                                        }
+                                    }
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+                </div>
+                @*<div class="col-md-auto">
+
+            </div>*@
+            }
+
+
+        </div>
+    </div>
+</center>
+
+
+
+
+
+
+@code {
+
+    [Parameter]
+    public string TeacherCode { get; set; }
+
+
+    public string GETURL = "ertiefgsahfvgweoqfgasldhpwfgqwefgwadgfqwiuefkjafuqewrtq";
+    public string GETURLS = "xmvsmxbcsdgrtfqeakdvlagdqwefrasfvqwerffwjf";
+
+    protected int Counter = 0;
+
+    List<Models.PASSDatas> Passdata;
+
+
+    Models.Teacher_Pictures TeacherPics = new Models.Teacher_Pictures();
+    Models.PASSDatas Teacher = new Models.PASSDatas();
+
+    bool isLoading = false;
+    bool spinning = false;
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        spinning = true;
+        await Task.Run(() => LongOperation());
+
+        Passdata = await _PassD.GetTeacherClass(TeacherCode);
+
+        Counter = 1;
+
+        TeacherPics = await _TP.GetTeacherPicture(TeacherCode);
+        Teacher = await _PassD.GetTeacherCode(TeacherCode);
+
+        spinning = false;
+        await Task.CompletedTask;
+    }
+
+    protected void Logout()
+    {
+        NavManager.NavigateTo("/");
+    }
+
+
+
+    protected int count()
+    {
+        return Counter++;
+    }
+
+
+    protected void LongOperation()
+    {
+        Task.Delay(10).Wait();
+        isLoading = false;
+    }
+
+    string ImageToDisplay(byte[] image)
+    {
+        if (image != null)
+        {
+            var base64 = Convert.ToBase64String(image);
+            var fs = string.Format("data:image/jpg;base64,{0}", base64);
+            return fs;
+        }
+        return "";
+    }
+
+
+    protected async Task AddClassSession(string Subs)
+    {
+
+        isLoading = true;
+        spinning = true;
+        StateHasChanged();
+        await Task.Run(() => LongOperation());
+        await _PassD.Addsession(Subs);
+        Passdata = await _PassD.GetTeacherClass(TeacherCode);
+
+        Counter = 1;
+
+        TeacherPics = await _TP.GetTeacherPicture(TeacherCode);
+        Teacher = await _PassD.GetTeacherCode(TeacherCode);
+
+        spinning = false;
+        await Task.CompletedTask;
+
+
+    }
+
+}

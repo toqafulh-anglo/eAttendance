@@ -1,0 +1,95 @@
+﻿@page "/TeacherSummary"
+@using AttendanceSystem.Data
+@inject iRepositoryPASSData _Passd
+@inject NavigationManager Navmanager
+
+
+    <style>
+        
+
+        .btn1 {
+            border: none;
+            outline: none;
+            height: 50px;
+            width: 100%;
+            background-color: #0765a2;
+            color: white;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+            .btn1:hover {
+                background: white;
+                border: 1px solid;
+                color: #0765a2;
+            }
+    </style>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <center>
+                <div class="col card py-5" style="padding:30px; border-radius:10px; box-shadow: 1px 1px 10px 1px #000;">
+                    <div class="form-group">
+
+                        <img src="/img/AGLogo.jpg" class="img-fluid" alt="" width="320"> <br><br>
+                        <h3>E-Attendance Summary</h3>
+                        <br />
+                        <select @bind="Campus" class="form-control py-2">
+                            <option value="">Select Campus</option>
+                            <option value="64">Campus 64</option>
+                            <option value="31">Campus 31</option>
+                            <option value="Korat">Campus Korat</option>
+                        </select>
+
+                        <input type="password" class="form-control my-2" id="TCode" placeholder="Enter Teacher Code" @bind="TeacherCode">
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn1" @onclick="GotoPage">Submit</button>
+                    </div>
+                    <div class="form-group">
+
+                        <label style="color:red;text-align:center;">@ErrorMessage</label>
+                    </div>
+                </div>
+            </center>
+
+        </div>
+
+
+    </div>
+
+
+
+@code {
+    public string TeacherCode = "";
+    public string ErrorMessage = "";
+    public string Campus = "";
+
+    private string longstr = "ertiequwgfasdfbqwoetwoqrewqprgfsadkvcapweyrt2pqregwjfalw9yrwerywasjfgawdufkfgawkufvakfjgweufvkfgwoufgqowrt23yr2p3rtgwdsfgdqo72egealjfl3rgwoeifgalwfbqwoetwoqrewqprgfsadkvcapweyrt2pqregwjfalw9yrwerywasjfgawdufkfgawkufvakfjg";
+
+
+    public async Task GotoPage()
+    {
+        if (TeacherCode.Length > 6)
+        {
+            Boolean verify;
+            verify = await _Passd.CheckTeacherOK(TeacherCode);
+            if (verify == true)
+            {
+                Navmanager.NavigateTo("/TeacherSummary/" + longstr + "/" + Campus);
+            }
+            else
+            {
+                ErrorMessage = "Teacher code incorrect. Please try again.";
+                await Task.FromResult(false);
+            }
+        }
+        else
+        {
+            ErrorMessage = "Teacher code not found. Please try again.";
+            await Task.FromResult(false);
+        }
+    }
+
+
+}
